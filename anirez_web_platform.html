@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AniRez - Stream Anime Online</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                            accent: '#00f2fe',
+                            pink: '#ec4899',
+                            darkBg: '#0b0914',
+                            cardBg: '#131126',
+                            navBg: '#0f0c1d'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0914;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f0c1d;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3b2d54;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #7c3aed;
+        }
+        .glow-effect {
+            box-shadow: 0 0 25px -5px rgba(124, 58, 237, 0.4);
+        }
+        .glow-effect-lg {
+            box-shadow: 0 0 50px -10px rgba(124, 58, 237, 0.6);
+        }
+        .poster-card {
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .poster-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 30px -8px rgba(124, 58, 237, 0.5);
+        }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .glass-panel {
+            background: rgba(19, 17, 38, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(124, 58, 237, 0.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-brand-600 selection:text-white">
+
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-40 w-full bg-brand-navBg/90 backdrop-blur-md border-b border-purple-900/40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
+            
+            <!-- Left Branding & Mobile Toggle -->
+            <div class="flex items-center gap-3">
+                <button id="mobileMenuBtn" class="lg:hidden text-gray-300 hover:text-white text-xl p-1">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <a href="#" onclick="showLandingView(); return false;" class="flex items-center gap-2 group">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-brand-accent flex items-center justify-center text-white font-extrabold text-xl shadow-lg shadow-purple-600/30 group-hover:scale-105 transition-transform">
+                        <i class="fa-solid fa-play text-sm ml-0.5"></i>
+                    </div>
+                    <span class="text-2xl font-black tracking-tight text-white">
+                        Ani<span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-brand-accent">Rez</span>
+                    </span>
+                </a>
+            </div>
+
+            <!-- Main Navigation Links -->
+            <nav class="hidden lg:flex items-center gap-6 text-sm font-semibold text-gray-300">
+                <a href="#" onclick="showLandingView(); return false;" class="hover:text-brand-400 transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-house text-xs"></i> Home
+                </a>
+                <a href="#" onclick="showFilterView(); return false;" class="hover:text-brand-400 transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-filter text-xs"></i> Catalog
+                </a>
+                <a href="#" onclick="showWatchlist(); return false;" class="hover:text-brand-400 transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-bookmark text-xs text-brand-400"></i> Watchlist
+                </a>
+                <a href="#" onclick="triggerRandomAnime(); return false;" class="hover:text-brand-400 transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-shuffle text-xs"></i> Random
+                </a>
+            </nav>
+
+            <!-- Right Controls: Lang, Quick Search, Sign In -->
+            <div class="flex items-center gap-3">
+                <!-- Language Toggle Badge -->
+                <div class="hidden sm:flex bg-purple-950/60 p-0.5 rounded-lg border border-purple-800/40 text-xs font-bold text-gray-300">
+                    <button id="langEn" class="px-2 py-1 rounded-md bg-brand-600 text-white shadow">EN</button>
+                    <button id="langJp" class="px-2 py-1 rounded-md hover:text-white transition-colors">JP</button>
+                </div>
+
+                <!-- Global Search Trigger Button -->
+                <button onclick="toggleQuickSearchModal()" class="p-2 text-gray-300 hover:text-white hover:bg-purple-900/40 rounded-lg transition-colors">
+                    <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                </button>
+
+                <!-- User Sign In Button -->
+                <button onclick="openAuthModal()" class="hidden sm:flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-brand-600 to-purple-600 hover:from-brand-500 hover:to-purple-500 rounded-lg shadow-lg shadow-purple-600/20 transition-all">
+                    <i class="fa-solid fa-user text-xs"></i> Sign in
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Modal: Quick Search Overlay -->
+    <div id="quickSearchModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-start justify-center pt-20 px-4">
+        <div class="w-full max-w-2xl bg-brand-cardBg border border-purple-600/30 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div class="p-4 border-b border-purple-900/50 flex items-center gap-3">
+                <i class="fa-solid fa-magnifying-glass text-brand-400 text-lg"></i>
+                <input id="quickSearchInput" type="text" placeholder="Type anime name (e.g. Solo Leveling, Jujutsu Kaisen)..." class="w-full bg-transparent text-white placeholder-gray-500 focus:outline-none text-base">
+                <button onclick="toggleQuickSearchModal()" class="text-gray-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div id="quickSearchResults" class="max-h-96 overflow-y-auto p-3 space-y-2 divide-y divide-purple-900/30">
+                <p class="text-center text-sm text-gray-400 py-6">Start typing to search live from AniList GraphQL database...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT VIEW CONTAINER -->
+    <main class="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- SECTION 1: LANDING HERO VIEW (AniKoto Banner Style) -->
+        <section id="landingHeroView" class="space-y-12">
+            <!-- Hero Banner Container -->
+            <div class="relative w-full rounded-2xl overflow-hidden border border-purple-800/40 shadow-2xl bg-gradient-to-b from-purple-950/40 to-brand-darkBg">
+                <!-- Background Image & Overlay -->
+                <div class="absolute inset-0 opacity-25 bg-[url('https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=1600&q=80')] bg-cover bg-center mix-blend-luminosity"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-brand-darkBg via-brand-darkBg/80 to-transparent"></div>
+
+                <!-- Hero Content Box -->
+                <div class="relative z-10 max-w-3xl mx-auto text-center px-4 py-16 sm:py-24 space-y-6">
+                    <!-- Brand Hero Header -->
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-600/20 border border-brand-500/30 text-brand-300 text-xs font-semibold uppercase tracking-wider mb-2">
+                        <i class="fa-solid fa-bolt text-brand-400"></i> Next-Gen Anime Streaming Platform
+                    </div>
+                    
+                    <h1 class="text-4xl sm:text-6xl font-black text-white tracking-tight leading-none">
+                        Ani<span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-purple-300 to-brand-accent">Rez</span>
+                    </h1>
+
+                    <!-- Hero Search Input -->
+                    <div class="relative max-w-xl mx-auto">
+                        <input id="heroSearchInput" type="text" placeholder="Search anime titles..." class="w-full pl-12 pr-28 py-4 bg-brand-cardBg/90 border border-purple-500/40 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 shadow-xl transition-all">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg"></i>
+                        <button onclick="executeHeroSearch()" class="absolute right-2 top-1/2 -translate-y-1/2 px-5 py-2.5 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white text-xs font-bold rounded-lg shadow-md transition-all flex items-center gap-2">
+                            <span>Search</span>
+                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </button>
+                    </div>
+
+                    <!-- Popular Search Tags -->
+                    <div class="text-xs text-gray-400 space-y-2">
+                        <p class="font-medium text-gray-300">Popular searches:</p>
+                        <div class="flex flex-wrap justify-center gap-2 max-w-2xl mx-auto">
+                            <button onclick="quickFilterTag('Solo Leveling')" class="hover:text-white hover:bg-purple-800/40 bg-purple-950/40 border border-purple-800/30 px-2.5 py-1 rounded-md transition-colors">Solo Leveling</button>
+                            <button onclick="quickFilterTag('One Piece')" class="hover:text-white hover:bg-purple-800/40 bg-purple-950/40 border border-purple-800/30 px-2.5 py-1 rounded-md transition-colors">One Piece</button>
+                            <button onclick="quickFilterTag('Jujutsu Kaisen')" class="hover:text-white hover:bg-purple-800/40 bg-purple-950/40 border border-purple-800/30 px-2.5 py-1 rounded-md transition-colors">Jujutsu Kaisen</button>
+                            <button onclick="quickFilterTag('Demon Slayer')" class="hover:text-white hover:bg-purple-800/40 bg-purple-950/40 border border-purple-800/30 px-2.5 py-1 rounded-md transition-colors">Demon Slayer</button>
+                            <button onclick="quickFilterTag('Bleach')" class="hover:text-white hover:bg-purple-800/40 bg-purple-950/40 border border-purple-800/30 px-2.5 py-1 rounded-md transition-colors">Bleach</button>
+                            <button onclick="quickFilterTag('Chainsaw Man')" class="hover:text-white hover:bg-purple-800/40 bg-purple-950/40 border border-purple-800/30 px-2.5 py-1 rounded-md transition-colors">Chainsaw Man</button>
+                        </div>
+                    </div>
+
+                    <!-- CTA Visit Catalog Button -->
+                    <div class="pt-4">
+                        <button onclick="showFilterView()" class="px-8 py-3.5 bg-gradient-to-r from-brand-600 via-purple-600 to-brand-accent text-white font-extrabold rounded-xl shadow-lg shadow-purple-600/30 hover:scale-105 transition-all inline-flex items-center gap-3">
+                            <span>Explore Full Catalog</span>
+                            <i class="fa-solid fa-arrow-right-long"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trending Carousel Section -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-fire text-brand-400"></i> Trending This Season
+                    </h2>
+                    <button onclick="showFilterView('TRENDING_DESC')" class="text-xs font-semibold text-brand-400 hover:text-brand-300">View All <i class="fa-solid fa-chevron-right text-[10px]"></i></button>
+                </div>
+                <div id="trendingContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6">
+                    <!-- Dynamic Loading Placeholders -->
+                    <div class="animate-pulse bg-brand-cardBg h-72 rounded-xl"></div>
+                    <div class="animate-pulse bg-brand-cardBg h-72 rounded-xl"></div>
+                    <div class="animate-pulse bg-brand-cardBg h-72 rounded-xl"></div>
+                    <div class="animate-pulse bg-brand-cardBg h-72 rounded-xl"></div>
+                    <div class="animate-pulse bg-brand-cardBg h-72 rounded-xl"></div>
+                    <div class="animate-pulse bg-brand-cardBg h-72 rounded-xl"></div>
+                </div>
+            </div>
+
+            <!-- Popular All-Time Section -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-crown text-amber-400"></i> Popular Anime
+                    </h2>
+                    <button onclick="showFilterView('POPULARITY_DESC')" class="text-xs font-semibold text-brand-400 hover:text-brand-300">View All <i class="fa-solid fa-chevron-right text-[10px]"></i></button>
+                </div>
+                <div id="popularContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6">
+                    <!-- Dynamic Loading Placeholders -->
+                    <div class="animate-pulse bg-brand-cardBg h-72 rounded-xl"></div>
+                    <div class="animate-pulse bg-brand-cardBg h-72 rounded-xl"></div>
+                    <div class="animate-pulse bg-brand-cardBg h-72 rounded-xl"></div>
+                    <div class="animate-pulse bg-brand-cardBg h-72 rounded-xl"></div>
+                    <div class="animate-pulse bg-brand-cardBg h-72 rounded-xl"></div>
+                    <div class="animate-pulse bg-brand-cardBg h-72 rounded-xl"></div>
+                </div>
+            </div>
+
+            <!-- Platform Features Info Grid -->
+            <div class="border-t border-purple-900/40 pt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-brand-cardBg/60 p-6 rounded-xl border border-purple-800/30 space-y-2">
+                    <div class="w-10 h-10 rounded-lg bg-brand-600/20 text-brand-400 flex items-center justify-center text-xl font-bold mb-3">
+                        <i class="fa-solid fa-cloud-arrow-down"></i>
+                    </div>
+                    <h3 class="font-bold text-white text-base">Live AniList API</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">Direct integration with AniList GraphQL endpoint to bring real-time schedules, cover art, and up-to-date metadata.</p>
+                </div>
+                <div class="bg-brand-cardBg/60 p-6 rounded-xl border border-purple-800/30 space-y-2">
+                    <div class="w-10 h-10 rounded-lg bg-purple-600/20 text-purple-400 flex items-center justify-center text-xl font-bold mb-3">
+                        <i class="fa-solid fa-server"></i>
+                    </div>
+                    <h3 class="font-bold text-white text-base">Anikoto & Multi-Servers</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">Seamless playback switching between Anikoto stream API, Consumet, MegaCloud, and multi-embed backends for uninterrupted watching.</p>
+                </div>
+                <div class="bg-brand-cardBg/60 p-6 rounded-xl border border-purple-800/30 space-y-2">
+                    <div class="w-10 h-10 rounded-lg bg-brand-accent/20 text-brand-accent flex items-center justify-center text-xl font-bold mb-3">
+                        <i class="fa-solid fa-sliders"></i>
+                    </div>
+                    <h3 class="font-bold text-white text-base">Advanced Catalog Filters</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">Filter anime by genres, release year, season, audio (Sub/Dub badge counts), and sort ordering instantly.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: ADVANCED FILTER / CATALOG VIEW (AniKoto Screenshot Inspired) -->
+        <section id="filterCatalogView" class="hidden space-y-6">
+            <div class="space-y-4">
+                <h1 class="text-2xl font-black text-white tracking-tight flex items-center gap-3">
+                    <i class="fa-solid fa-filter text-brand-400"></i> Anime Catalog & Filter
+                </h1>
+
+                <!-- Multi-select Filter Bar Container -->
+                <div class="bg-brand-cardBg p-4 sm:p-6 rounded-2xl border border-purple-800/40 shadow-xl space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                        
+                        <!-- Search Keyword Filter -->
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Keyword</label>
+                            <input id="filterSearchInput" type="text" placeholder="Search keyword..." class="w-full bg-purple-950/60 border border-purple-800/50 rounded-lg px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-brand-500">
+                        </div>
+
+                        <!-- Genre Selector -->
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Genre</label>
+                            <select id="filterGenre" class="w-full bg-purple-950/60 border border-purple-800/50 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+                                <option value="">Select genre (All)</option>
+                                <option value="Action">Action</option>
+                                <option value="Adventure">Adventure</option>
+                                <option value="Comedy">Comedy</option>
+                                <option value="Drama">Drama</option>
+                                <option value="Fantasy">Fantasy</option>
+                                <option value="Horror">Horror</option>
+                                <option value="Mahou Shoujo">Mahou Shoujo</option>
+                                <option value="Mecha">Mecha</option>
+                                <option value="Music">Music</option>
+                                <option value="Mystery">Mystery</option>
+                                <option value="Psychological">Psychological</option>
+                                <option value="Romance">Romance</option>
+                                <option value="Sci-Fi">Sci-Fi</option>
+                                <option value="Slice of Life">Slice of Life</option>
+                                <option value="Sports">Sports</option>
+                                <option value="Supernatural">Supernatural</option>
+                                <option value="Thriller">Thriller</option>
+                            </select>
+                        </div>
+
+                        <!-- Season Selector -->
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Season</label>
+                            <select id="filterSeason" class="w-full bg-purple-950/60 border border-purple-800/50 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+                                <option value="">Select season (All)</option>
+                                <option value="WINTER">Winter</option>
+                                <option value="SPRING">Spring</option>
+                                <option value="SUMMER">Summer</option>
+                                <option value="FALL">Fall</option>
+                            </select>
+                        </div>
+
+                        <!-- Year Selector -->
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Year</label>
+                            <select id="filterYear" class="w-full bg-purple-950/60 border border-purple-800/50 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+                                <option value="">Select year (All)</option>
+                                <option value="2026">2026</option>
+                                <option value="2025">2025</option>
+                                <option value="2024">2024</option>
+                                <option value="2023">2023</option>
+                                <option value="2022">2022</option>
+                                <option value="2021">2021</option>
+                                <option value="2020">2020</option>
+                                <option value="2019">2019</option>
+                                <option value="2018">2018</option>
+                            </select>
+                        </div>
+
+                        <!-- Format / Type Selector -->
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Format Type</label>
+                            <select id="filterFormat" class="w-full bg-purple-950/60 border border-purple-800/50 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+                                <option value="">Select type (All)</option>
+                                <option value="TV">TV Series</option>
+                                <option value="MOVIE">Movie</option>
+                                <option value="OVA">OVA</option>
+                                <option value="ONA">ONA</option>
+                                <option value="SPECIAL">Special</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Row 2 Filters & Submit -->
+                    <div class="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-purple-900/30">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <!-- Sort Order -->
+                            <div>
+                                <select id="filterSort" class="bg-purple-950/60 border border-purple-800/50 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none">
+                                    <option value="POPULARITY_DESC">Most Popular</option>
+                                    <option value="TRENDING_DESC">Trending Now</option>
+                                    <option value="SCORE_DESC">Highest Rated</option>
+                                    <option value="START_DATE_DESC">Newest Released</option>
+                                </select>
+                            </div>
+
+                            <!-- Reset Filters Button -->
+                            <button onclick="resetFilters()" class="text-xs text-gray-400 hover:text-white underline">
+                                Reset Filters
+                            </button>
+                        </div>
+
+                        <!-- Action Submit Filter Button -->
+                        <button onclick="applyFilters()" class="px-6 py-2 bg-gradient-to-r from-brand-600 to-purple-600 hover:from-brand-500 hover:to-purple-500 text-white text-xs font-extrabold rounded-lg shadow-md transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-filter text-xs"></i> Apply Filter
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtered Results Grid -->
+            <div id="catalogGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6">
+                <!-- Dynamic Posters Loaded Here -->
+            </div>
+        </section>
+
+        <!-- SECTION 3: WATCHLIST VIEW -->
+        <section id="watchlistCatalogView" class="hidden space-y-6">
+            <h1 class="text-2xl font-black text-white tracking-tight flex items-center gap-3">
+                <i class="fa-solid fa-bookmark text-brand-400"></i> My Saved Watchlist
+            </h1>
+            <div id="watchlistGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6">
+                <p class="col-span-full text-center text-gray-400 py-12">No anime saved in your watchlist yet.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ANIME DETAIL MODAL -->
+    <div id="animeDetailModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+        <div class="relative w-full max-w-4xl bg-brand-cardBg border border-purple-600/40 rounded-2xl shadow-2xl overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-200">
+            <!-- Modal Header Banner -->
+            <div id="modalBanner" class="relative h-48 sm:h-64 bg-cover bg-center">
+                <div class="absolute inset-0 bg-gradient-to-t from-brand-cardBg via-brand-cardBg/60 to-transparent"></div>
+                <button onclick="closeAnimeDetailModal()" class="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-black/60 text-white hover:bg-brand-600 flex items-center justify-center transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Content Body -->
+            <div class="relative z-10 px-4 sm:px-8 pb-8 -mt-20 space-y-6">
+                <div class="flex flex-col sm:flex-row gap-6 items-start">
+                    <!-- Cover Poster -->
+                    <img id="modalCover" src="" alt="Anime Cover" class="w-36 sm:w-48 rounded-xl border-2 border-purple-500/40 shadow-2xl shrink-0 object-cover">
+                    
+                    <!-- Meta Info -->
+                    <div class="space-y-3 flex-1">
+                        <div id="modalBadges" class="flex flex-wrap items-center gap-2"></div>
+                        <h2 id="modalTitle" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight"></h2>
+                        <h3 id="modalNativeTitle" class="text-sm font-semibold text-purple-300"></h3>
+                        
+                        <div class="flex flex-wrap items-center gap-4 text-xs text-gray-300 pt-1">
+                            <span id="modalScore" class="text-amber-400 font-bold flex items-center gap-1"><i class="fa-solid fa-star"></i> N/A</span>
+                            <span id="modalEpisodes"><i class="fa-solid fa-tv text-brand-400"></i> Ep: N/A</span>
+                            <span id="modalStatus"><i class="fa-solid fa-circle-info text-brand-400"></i> Status: N/A</span>
+                            <span id="modalYear"><i class="fa-solid fa-calendar text-brand-400"></i> Year: N/A</span>
+                        </div>
+
+                        <div id="modalGenres" class="flex flex-wrap gap-1.5 pt-1"></div>
+
+                        <div class="flex flex-wrap gap-3 pt-3">
+                            <button id="modalWatchBtn" onclick="" class="px-6 py-2.5 bg-gradient-to-r from-brand-600 to-purple-600 hover:from-brand-500 hover:to-purple-500 text-white font-extrabold text-xs rounded-xl shadow-lg shadow-purple-600/30 transition-all flex items-center gap-2">
+                                <i class="fa-solid fa-play"></i> Watch Now
+                            </button>
+                            <button id="modalBookmarkBtn" onclick="" class="px-4 py-2.5 bg-purple-950/80 border border-purple-800/60 hover:bg-purple-900 text-white font-bold text-xs rounded-xl transition-all flex items-center gap-2">
+                                <i class="fa-regular fa-bookmark"></i> Add to Watchlist
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="space-y-2">
+                    <h4 class="text-sm font-bold text-white uppercase tracking-wider">Synopsis</h4>
+                    <p id="modalDescription" class="text-xs sm:text-sm text-gray-300 leading-relaxed max-h-40 overflow-y-auto pr-2"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIDEO STREAM WATCH PLAYER OVERLAY -->
+    <div id="watchPlayerOverlay" class="hidden fixed inset-0 z-50 bg-black/95 overflow-y-auto">
+        <div class="max-w-7xl mx-auto px-4 py-4 space-y-4">
+            <!-- Header Nav -->
+            <div class="flex items-center justify-between border-b border-purple-900/50 pb-3">
+                <div class="flex items-center gap-3">
+                    <button onclick="closeWatchPlayer()" class="px-3 py-1.5 bg-purple-950/80 hover:bg-brand-600 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-left"></i> Back
+                    </button>
+                    <h2 id="playerAnimeTitle" class="text-base font-bold text-white truncate max-w-md sm:max-w-xl"></h2>
+                </div>
+                <div class="text-xs font-bold text-brand-400" id="playerEpTitle">Episode 1</div>
+            </div>
+
+            <!-- Video Player Iframe Container -->
+            <div class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden border border-purple-800/40 shadow-2xl">
+                <iframe id="videoIframe" src="" class="w-full h-full border-0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+            </div>
+
+            <!-- Streaming Server Selectors & Audio Switch -->
+            <div class="bg-brand-cardBg p-4 rounded-xl border border-purple-900/40 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-2 text-xs font-bold text-gray-300">
+                        <i class="fa-solid fa-server text-brand-400"></i> Stream Server:
+                    </div>
+
+                    <!-- Audio Mode Toggle (SUB / DUB) -->
+                    <div class="flex bg-purple-950 p-1 rounded-lg border border-purple-800/40 text-xs font-bold">
+                        <button id="serverSubBtn" onclick="switchAudioMode('sub')" class="px-3 py-1 rounded-md bg-brand-600 text-white">SUB</button>
+                        <button id="serverDubBtn" onclick="switchAudioMode('dub')" class="px-3 py-1 rounded-md text-gray-400 hover:text-white">DUB</button>
+                    </div>
+                </div>
+
+                <!-- Available Server Buttons Grid -->
+                <div id="serverList" class="flex flex-wrap gap-2 text-xs">
+                    <!-- Dynamically generated server sources -->
+                </div>
+            </div>
+
+            <!-- Episode Selector Drawer -->
+            <div class="bg-brand-cardBg p-4 rounded-xl border border-purple-900/40 space-y-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-gray-300">Episodes List</h3>
+                    <span id="totalEpCount" class="text-xs text-brand-400 font-semibold">1 Episode</span>
+                </div>
+                <div id="episodesGrid" class="grid grid-cols-4 sm:grid-cols-8 md:grid-cols-12 lg:grid-cols-16 gap-2 max-h-48 overflow-y-auto p-1">
+                    <!-- Episode Buttons -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Simple Auth Sign-In Modal Placeholder -->
+    <div id="authModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-brand-cardBg border border-purple-600/40 rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-white">Sign in to AniRez</h3>
+                <button onclick="closeAuthModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p class="text-xs text-gray-400">Log in to sync your watch history and saved bookmarks.</p>
+            <input type="email" placeholder="Email address" class="w-full px-3 py-2 bg-purple-950/60 border border-purple-800/50 rounded-lg text-xs text-white placeholder-gray-500 focus:outline-none">
+            <input type="password" placeholder="Password" class="w-full px-3 py-2 bg-purple-950/60 border border-purple-800/50 rounded-lg text-xs text-white placeholder-gray-500 focus:outline-none">
+            <button onclick="closeAuthModal()" class="w-full py-2.5 bg-gradient-to-r from-brand-600 to-purple-600 hover:from-brand-500 text-white font-bold text-xs rounded-lg shadow-md">Sign In</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-auto border-t border-purple-900/30 bg-brand-navBg py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center space-y-3">
+            <div class="flex items-center justify-center gap-2">
+                <div class="w-7 h-7 rounded-lg bg-brand-600 flex items-center justify-center text-white font-black text-sm">
+                    <i class="fa-solid fa-play text-xs"></i>
+                </div>
+                <span class="text-xl font-black text-white">Ani<span class="text-brand-400">Rez</span></span>
+            </div>
+            <p class="text-xs text-gray-500 max-w-md mx-auto">AniRez does not store files on its server. All contents are provided by non-affiliated third parties and live AniList GraphQL endpoints.</p>
+            <p class="text-[11px] text-gray-600">&copy; 2026 AniRez. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // State variables
+        let currentAnimeList = [];
+        let watchlist = JSON.parse(localStorage.getItem('aniRez_watchlist') || '[]');
+        let selectedAnime = null;
+        let currentEpisode = 1;
+        let currentAudioMode = 'sub';
+        let currentServerIndex = 0;
+
+        // AniList GraphQL Query Definition
+        const ANILIST_GRAPHQL_URL = 'https://graphql.anilist.co';
+
+        const MEDIA_QUERY = `
+        query ($search: String, $genre: String, $season: MediaSeason, $seasonYear: Int, $format: MediaFormat, $sort: [MediaSort], $page: Int = 1, $perPage: Int = 24) {
+            Page(page: $page, perPage: $perPage) {
+                media(search: $search, genre: $genre, season: $season, seasonYear: $seasonYear, format: $format, sort: $sort, type: ANIME) {
+                    id
+                    title {
+                        romaji
+                        english
+                        native
+                    }
+                    coverImage {
+                        extraLarge
+                        large
+                        medium
+                        color
+                    }
+                    bannerImage
+                    episodes
+                    status
+                    format
+                    genres
+                    description
+                    meanScore
+                    season
+                    seasonYear
+                    nextAiringEpisode {
+                        episode
+                    }
+                }
+            }
+        }
+        `;
+
+        async function fetchAniListMedia(variables = {}) {
+            try {
+                const response = await fetch(ANILIST_GRAPHQL_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: MEDIA_QUERY,
+                        variables: variables
+                    })
+                });
+
+                const data = await response.json();
+                if (data && data.data && data.data.Page && data.data.Page.media) {
+                    return data.data.Page.media;
+                }
+                throw new Error('Malformed response from AniList');
+            } catch (err) {
+                console.warn('AniList API fetch fallback activated:', err);
+                return getFallbackAnimeData();
+            }
+        }
+
+        // Guaranteed Fallback Anime List if offline or network throttled
+        function getFallbackAnimeData() {
+            return [
+                {
+                    id: 151807,
+                    title: { english: "Solo Leveling", romaji: "Ore dake Level Up na Ken" },
+                    coverImage: { large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b151807-S9v5e1C0M3S4.jpg" },
+                    episodes: 12,
+                    format: "TV",
+                    genres: ["Action", "Adventure", "Fantasy"],
+                    meanScore: 85,
+                    status: "FINISHED",
+                    description: "10 years ago, after the Gate that connected the real world with the world of monsters opened, some of the ordinary people received the power to hunt monsters."
+                },
+                {
+                    id: 21,
+                    title: { english: "One Piece", romaji: "One Piece" },
+                    coverImage: { large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b21-A33R1A2p8p3B.jpg" },
+                    episodes: 1100,
+                    format: "TV",
+                    genres: ["Action", "Adventure", "Comedy"],
+                    meanScore: 88,
+                    status: "RELEASING",
+                    description: "Gold Roger was known as the Pirate King, the strongest and most infamous being to have sailed the Grand Line."
+                },
+                {
+                    id: 113415,
+                    title: { english: "Jujutsu Kaisen", romaji: "Jujutsu Kaisen" },
+                    coverImage: { large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/b113415-97Axl8R35jYf.png" },
+                    episodes: 24,
+                    format: "TV",
+                    genres: ["Action", "Supernatural"],
+                    meanScore: 86,
+                    status: "FINISHED",
+                    description: "A boy fights... for 'the right death'. Hardship, regret, shame: the negative feelings that humans feel become Curses."
+                },
+                {
+                    id: 101922,
+                    title: { english: "Demon Slayer: Kimetsu no Yaiba", romaji: "Kimetsu no Yaiba" },
+                    coverImage: { large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx101922-PEn1P31A2S2E.jpg" },
+                    episodes: 26,
+                    format: "TV",
+                    genres: ["Action", "Fantasy", "Supernatural"],
+                    meanScore: 84,
+                    status: "FINISHED",
+                    description: "It is the Taisho Period in Japan. Tanjiro, a kindhearted boy who sells charcoal for a living, finds his family slaughtered by a demon."
+                },
+                {
+                    id: 20,
+                    title: { english: "Naruto: Shippuden", romaji: "Naruto: Shippuuden" },
+                    coverImage: { large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx20-20jtIAnKTeoO.jpg" },
+                    episodes: 500,
+                    format: "TV",
+                    genres: ["Action", "Adventure"],
+                    meanScore: 81,
+                    status: "FINISHED",
+                    description: "Naruto Uzumaki is a loud, hyperactive, ninja who seeks approval and recognition."
+                },
+                {
+                    id: 1535,
+                    title: { english: "Death Note", romaji: "Death Note" },
+                    coverImage: { large: "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx1535-lawR3S8s9P9S.jpg" },
+                    episodes: 37,
+                    format: "TV",
+                    genres: ["Mystery", "Psychological", "Supernatural"],
+                    meanScore: 84,
+                    status: "FINISHED",
+                    description: "A high-school student who discovers a supernatural notebook that grants its user the ability to kill anyone whose name and face they know."
+                }
+            ];
+        }
+
+        function renderAnimeCards(mediaList, targetContainerId) {
+            const container = document.getElementById(targetContainerId);
+            if (!container) return;
+
+            if (!mediaList || mediaList.length === 0) {
+                container.innerHTML = `<p class="col-span-full text-center text-gray-400 py-10">No anime found matching criteria.</p>`;
+                return;
+            }
+
+            container.innerHTML = mediaList.map(anime => {
+                const title = anime.title.english || anime.title.romaji || 'Anime Title';
+                const episodes = anime.episodes || anime.nextAiringEpisode?.episode || '?';
+                const format = anime.format || 'TV';
+                const cover = anime.coverImage?.large || anime.coverImage?.medium || 'https://placehold.co/300x400/131126/ffffff?text=AniRez';
+                
+                // Audio badge counts matching screenshot UI (Sub CC, Dub Mic)
+                const subCount = episodes;
+                const dubCount = typeof episodes === 'number' ? Math.max(1, episodes - 2) : '?';
+
+                return `
+                <div class="poster-card cursor-pointer group flex flex-col" onclick="openAnimeDetail(${anime.id})">
+                    <div class="relative w-full aspect-[3/4] rounded-xl overflow-hidden bg-brand-cardBg border border-purple-900/30">
+                        <img src="${cover}" alt="${title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy">
+                        
+                        <!-- Top Floating Rating Badge -->
+                        <div class="absolute top-2 right-2 bg-black/75 backdrop-blur-md px-2 py-0.5 rounded-md text-[10px] font-extrabold text-amber-400 flex items-center gap-1 border border-amber-400/20">
+                            <i class="fa-solid fa-star text-[9px]"></i> ${anime.meanScore ? (anime.meanScore / 10).toFixed(1) : '7.5'}
+                        </div>
+
+                        <!-- Bottom AniKoto-Style Sub/Dub Badges (From Screenshot) -->
+                        <div class="absolute bottom-2 left-2 right-2 flex items-center justify-between pointer-events-none">
+                            <div class="flex items-center gap-1">
+                                <!-- Sub CC Badge -->
+                                <span class="bg-cyan-600/90 text-white text-[10px] font-black px-1.5 py-0.5 rounded flex items-center gap-1 shadow">
+                                    <i class="fa-solid fa-closed-captioning text-[9px]"></i> ${subCount}
+                                </span>
+                                <!-- Dub Mic Badge -->
+                                <span class="bg-pink-600/90 text-white text-[10px] font-black px-1.5 py-0.5 rounded flex items-center gap-1 shadow">
+                                    <i class="fa-solid fa-microphone text-[9px]"></i> ${dubCount}
+                                </span>
+                            </div>
+                            <!-- Media Type Format -->
+                            <span class="bg-purple-950/90 text-purple-200 text-[10px] font-bold px-1.5 py-0.5 rounded border border-purple-700/40 uppercase">
+                                ${format}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Anime Title -->
+                    <h3 class="mt-2 text-xs font-bold text-gray-200 group-hover:text-brand-400 transition-colors line-clamp-2 leading-snug">
+                        ${title}
+                    </h3>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function showLandingView() {
+            document.getElementById('landingHeroView').classList.remove('hidden');
+            document.getElementById('filterCatalogView').classList.add('hidden');
+            document.getElementById('watchlistCatalogView').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function showFilterView(defaultSort = 'POPULARITY_DESC') {
+            document.getElementById('landingHeroView').classList.add('hidden');
+            document.getElementById('watchlistCatalogView').classList.add('hidden');
+            document.getElementById('filterCatalogView').classList.remove('hidden');
+            
+            if (defaultSort) {
+                document.getElementById('filterSort').value = defaultSort;
+            }
+
+            await applyFilters();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showWatchlist() {
+            document.getElementById('landingHeroView').classList.add('hidden');
+            document.getElementById('filterCatalogView').classList.add('hidden');
+            document.getElementById('watchlistCatalogView').classList.remove('hidden');
+
+            renderAnimeCards(watchlist, 'watchlistGrid');
+        }
+
+        async function applyFilters() {
+            const search = document.getElementById('filterSearchInput').value.trim() || undefined;
+            const genre = document.getElementById('filterGenre').value || undefined;
+            const season = document.getElementById('filterSeason').value || undefined;
+            const year = document.getElementById('filterYear').value ? parseInt(document.getElementById('filterYear').value) : undefined;
+            const format = document.getElementById('filterFormat').value || undefined;
+            const sort = [document.getElementById('filterSort').value];
+
+            const grid = document.getElementById('catalogGrid');
+            grid.innerHTML = '<div class="col-span-full text-center text-purple-400 py-12 font-bold animate-pulse">Loading anime catalog...</div>';
+
+            const media = await fetchAniListMedia({
+                search,
+                genre,
+                season,
+                seasonYear: year,
+                format,
+                sort,
+                perPage: 30
+            });
+
+            currentAnimeList = media;
+            renderAnimeCards(media, 'catalogGrid');
+        }
+
+        function resetFilters() {
+            document.getElementById('filterSearchInput').value = '';
+            document.getElementById('filterGenre').value = '';
+            document.getElementById('filterSeason').value = '';
+            document.getElementById('filterYear').value = '';
+            document.getElementById('filterFormat').value = '';
+            document.getElementById('filterSort').value = 'POPULARITY_DESC';
+            applyFilters();
+        }
+
+        function executeHeroSearch() {
+            const query = document.getElementById('heroSearchInput').value.trim();
+            if (query) {
+                document.getElementById('filterSearchInput').value = query;
+                showFilterView();
+            }
+        }
+
+        function quickFilterTag(title) {
+            document.getElementById('filterSearchInput').value = title;
+            showFilterView();
+        }
+
+        async function openAnimeDetail(animeId) {
+            let anime = currentAnimeList.find(a => a.id === animeId);
+            
+            if (!anime) {
+                const results = await fetchAniListMedia({ search: animeId.toString() });
+                anime = results[0];
+            }
+
+            if (!anime) return;
+            selectedAnime = anime;
+
+            const title = anime.title.english || anime.title.romaji;
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalNativeTitle').textContent = anime.title.native || '';
+            document.getElementById('modalCover').src = anime.coverImage?.large || '';
+            
+            const banner = anime.bannerImage || anime.coverImage?.extraLarge || anime.coverImage?.large;
+            document.getElementById('modalBanner').style.backgroundImage = `url('${banner}')`;
+            
+            document.getElementById('modalScore').innerHTML = `<i class="fa-solid fa-star"></i> ${anime.meanScore ? (anime.meanScore/10).toFixed(1) : '8.0'}`;
+            document.getElementById('modalEpisodes').innerHTML = `<i class="fa-solid fa-tv text-brand-400"></i> Ep: ${anime.episodes || 'Ongoing'}`;
+            document.getElementById('modalStatus').innerHTML = `<i class="fa-solid fa-circle-info text-brand-400"></i> ${anime.status || 'Finished'}`;
+            document.getElementById('modalYear').innerHTML = `<i class="fa-solid fa-calendar text-brand-400"></i> ${anime.seasonYear || '2024'}`;
+            
+            document.getElementById('modalDescription').innerHTML = anime.description || 'No description available for this series.';
+
+            // Genres
+            const genresContainer = document.getElementById('modalGenres');
+            genresContainer.innerHTML = (anime.genres || ['Action', 'Fantasy']).map(g => 
+                `<span class="px-2 py-0.5 rounded-md bg-purple-950 text-purple-300 text-[10px] font-semibold border border-purple-800/40">${g}</span>`
+            ).join('');
+
+            // Buttons
+            document.getElementById('modalWatchBtn').onclick = () => {
+                closeAnimeDetailModal();
+                startWatching(anime, 1);
+            };
+
+            const isSaved = watchlist.some(item => item.id === anime.id);
+            const bookmarkBtn = document.getElementById('modalBookmarkBtn');
+            bookmarkBtn.innerHTML = isSaved ? `<i class="fa-solid fa-check text-green-400"></i> Saved` : `<i class="fa-regular fa-bookmark"></i> Add to Watchlist`;
+            bookmarkBtn.onclick = () => toggleBookmark(anime);
+
+            document.getElementById('animeDetailModal').classList.remove('hidden');
+        }
+
+        function closeAnimeDetailModal() {
+            document.getElementById('animeDetailModal').classList.add('hidden');
+        }
+
+        function toggleBookmark(anime) {
+            const index = watchlist.findIndex(item => item.id === anime.id);
+            if (index > -1) {
+                watchlist.splice(index, 1);
+            } else {
+                watchlist.push(anime);
+            }
+            localStorage.setItem('aniRez_watchlist', JSON.stringify(watchlist));
+            
+            // Refresh modal button state
+            const isSaved = watchlist.some(item => item.id === anime.id);
+            const bookmarkBtn = document.getElementById('modalBookmarkBtn');
+            bookmarkBtn.innerHTML = isSaved ? `<i class="fa-solid fa-check text-green-400"></i> Saved` : `<i class="fa-regular fa-bookmark"></i> Add to Watchlist`;
+        }
+
+        function startWatching(anime, episodeNumber = 1) {
+            selectedAnime = anime;
+            currentEpisode = episodeNumber;
+
+            const title = anime.title.english || anime.title.romaji;
+            document.getElementById('playerAnimeTitle').textContent = title;
+            document.getElementById('playerEpTitle').textContent = `Episode ${episodeNumber}`;
+
+            renderServerButtons();
+            renderEpisodeButtons(anime.episodes || 12);
+            loadVideoSource();
+
+            document.getElementById('watchPlayerOverlay').classList.remove('hidden');
+        }
+
+        function closeWatchPlayer() {
+            document.getElementById('watchPlayerOverlay').classList.add('hidden');
+            document.getElementById('videoIframe').src = '';
+        }
+
+        // Multi-server source generator (Including Anikoto API & Fallback Embeds)
+        function getServerEmbedUrl(serverIndex, title, episode, mode) {
+            const cleanTitle = encodeURIComponent(title.toLowerCase().replace(/[^a-z0-9 ]/g, "").trim().replace(/\s+/g, "-"));
+            
+            const servers = [
+                // Server 1: Anikoto Embed API
+                `https://anikotoapi.site/embed/${cleanTitle}-episode-${episode}`,
+                // Server 2: AutoEmbed Anime
+                `https://player.autoembed.cc/embed/anime/${cleanTitle}/${episode}`,
+                // Server 3: Consumet / Zoro Player Embed
+                `https://vidsrc.to/embed/anime/${cleanTitle}/${episode}`,
+                // Server 4: MegaCloud / Gogoanime Stream
+                `https://em.2embed.cc/embed/anime/${cleanTitle}-${episode}`,
+                // Server 5: Doodstream Fallback
+                `https://mickey-stream.org/embed/${cleanTitle}/${episode}`,
+                // Server 6: Vidstreaming Backup
+                `https://streamani.net/embed/${cleanTitle}-episode-${episode}`
+            ];
+
+            return servers[serverIndex] || servers[0];
+        }
+
+        function renderServerButtons() {
+            const serverNames = [
+                'Anikoto Stream API (Primary)',
+                'AutoEmbed HD',
+                'VidSrc Fast',
+                'MegaCloud Ultra',
+                'Doodstream Backup',
+                'VidStreaming'
+            ];
+
+            const container = document.getElementById('serverList');
+            container.innerHTML = serverNames.map((name, idx) => `
+                <button onclick="switchServer(${idx})" class="px-3 py-1.5 rounded-lg font-bold transition-all ${idx === currentServerIndex ? 'bg-brand-600 text-white shadow-md' : 'bg-purple-950/60 hover:bg-purple-900 text-gray-300 border border-purple-800/40'}">
+                    <i class="fa-solid fa-play text-[10px] mr-1"></i> ${name}
+                </button>
+            `).join('');
+        }
+
+        function switchServer(index) {
+            currentServerIndex = index;
+            renderServerButtons();
+            loadVideoSource();
+        }
+
+        function switchAudioMode(mode) {
+            currentAudioMode = mode;
+            document.getElementById('serverSubBtn').className = mode === 'sub' ? 'px-3 py-1 rounded-md bg-brand-600 text-white' : 'px-3 py-1 rounded-md text-gray-400 hover:text-white';
+            document.getElementById('serverDubBtn').className = mode === 'dub' ? 'px-3 py-1 rounded-md bg-brand-600 text-white' : 'px-3 py-1 rounded-md text-gray-400 hover:text-white';
+            loadVideoSource();
+        }
+
+        function loadVideoSource() {
+            if (!selectedAnime) return;
+            const title = selectedAnime.title.english || selectedAnime.title.romaji;
+            const url = getServerEmbedUrl(currentServerIndex, title, currentEpisode, currentAudioMode);
+            document.getElementById('videoIframe').src = url;
+        }
+
+        function renderEpisodeButtons(totalEpisodes) {
+            const count = typeof totalEpisodes === 'number' && totalEpisodes > 0 ? totalEpisodes : 12;
+            document.getElementById('totalEpCount').textContent = `${count} Episodes`;
+
+            const container = document.getElementById('episodesGrid');
+            let html = '';
+            for (let i = 1; i <= Math.min(count, 100); i++) {
+                const isActive = i === currentEpisode;
+                html += `
+                    <button onclick="changeEpisode(${i})" class="py-2 text-xs font-bold rounded-lg border transition-all ${isActive ? 'bg-brand-600 text-white border-brand-400 shadow-md' : 'bg-purple-950/60 text-gray-300 border-purple-800/40 hover:bg-purple-900 hover:text-white'}">
+                        ${i}
+                    </button>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        function changeEpisode(epNum) {
+            currentEpisode = epNum;
+            document.getElementById('playerEpTitle').textContent = `Episode ${epNum}`;
+            renderEpisodeButtons(selectedAnime.episodes || 12);
+            loadVideoSource();
+        }
+
+        function toggleQuickSearchModal() {
+            const modal = document.getElementById('quickSearchModal');
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) {
+                document.getElementById('quickSearchInput').focus();
+            }
+        }
+
+        // Live Debounce Search
+        let debounceTimer;
+        document.getElementById('quickSearchInput').addEventListener('input', (e) => {
+            clearTimeout(debounceTimer);
+            const query = e.target.value.trim();
+            if (!query) {
+                document.getElementById('quickSearchResults').innerHTML = '<p class="text-center text-sm text-gray-400 py-6">Start typing to search live from AniList GraphQL database...</p>';
+                return;
+            }
+
+            debounceTimer = setTimeout(async () => {
+                const results = await fetchAniListMedia({ search: query, perPage: 6 });
+                const container = document.getElementById('quickSearchResults');
+                
+                if (results.length === 0) {
+                    container.innerHTML = '<p class="text-center text-sm text-gray-400 py-6">No matching anime found.</p>';
+                    return;
+                }
+
+                container.innerHTML = results.map(anime => `
+                    <div onclick="toggleQuickSearchModal(); openAnimeDetail(${anime.id})" class="flex items-center gap-3 p-2 rounded-xl hover:bg-purple-900/40 cursor-pointer transition-colors">
+                        <img src="${anime.coverImage?.medium}" class="w-12 h-16 object-cover rounded-lg">
+                        <div>
+                            <h4 class="text-sm font-bold text-white line-clamp-1">${anime.title.english || anime.title.romaji}</h4>
+                            <p class="text-xs text-gray-400">${anime.format || 'TV'} • ${anime.seasonYear || '2024'} • <span class="text-amber-400">★ ${(anime.meanScore/10).toFixed(1)}</span></p>
+                        </div>
+                    </div>
+                `).join('');
+            }, 300);
+        });
+
+        function triggerRandomAnime() {
+            if (currentAnimeList.length > 0) {
+                const random = currentAnimeList[Math.floor(Math.random() * currentAnimeList.length)];
+                openAnimeDetail(random.id);
+            } else {
+                showFilterView();
+            }
+        }
+
+        function openAuthModal() {
+            document.getElementById('authModal').classList.remove('hidden');
+        }
+
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.add('hidden');
+        }
+
+        window.onload = async function () {
+            // Load initial trending and popular rows from AniList API
+            const trending = await fetchAniListMedia({ sort: ['TRENDING_DESC'], perPage: 6 });
+            const popular = await fetchAniListMedia({ sort: ['POPULARITY_DESC'], perPage: 6 });
+
+            currentAnimeList = [...trending, ...popular];
+
+            renderAnimeCards(trending, 'trendingContainer');
+            renderAnimeCards(popular, 'popularContainer');
+        };
+    </script>
+</body>
+</html>
